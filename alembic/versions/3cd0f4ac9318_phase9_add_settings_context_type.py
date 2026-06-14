@@ -36,11 +36,12 @@ def upgrade() -> None:
                 IF constraint_name IS NOT NULL THEN
                     EXECUTE 'ALTER TABLE smart_comms_conversations DROP CONSTRAINT ' || constraint_name;
                 END IF;
-            END $$;
-
+            END $$
+        """)
+        op.execute("""
             ALTER TABLE smart_comms_conversations
             ADD CONSTRAINT smart_comms_conversations_context_type_check
-            CHECK (context_type IN ('dashboard', 'orders_list', 'load_order', 'carrier_match', 'intake_review', 'settings'));
+            CHECK (context_type IN ('dashboard', 'orders_list', 'load_order', 'carrier_match', 'intake_review', 'settings'))
         """)
     else:
         # SQLite: use batch alter to recreate the constraint
@@ -54,13 +55,11 @@ def upgrade() -> None:
 
 def downgrade() -> None:
     if op.get_bind().dialect.name == "postgresql":
+        op.execute("ALTER TABLE smart_comms_conversations DROP CONSTRAINT IF EXISTS smart_comms_conversations_context_type_check")
         op.execute("""
             ALTER TABLE smart_comms_conversations
-            DROP CONSTRAINT IF EXISTS smart_comms_conversations_context_type_check;
-
-            ALTER TABLE smart_comms_conversations
             ADD CONSTRAINT smart_comms_conversations_context_type_check
-            CHECK (context_type IN ('dashboard', 'orders_list', 'load_order', 'carrier_match', 'intake_review'));
+            CHECK (context_type IN ('dashboard', 'orders_list', 'load_order', 'carrier_match', 'intake_review'))
         """)
     else:
         with op.batch_alter_table("smart_comms_conversations") as batch_op:
