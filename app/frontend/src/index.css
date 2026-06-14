@@ -1,0 +1,224 @@
+@import "tailwindcss";
+
+:root {
+  color-scheme: dark;
+  --hermes-bg:            #0c0c10;
+  --hermes-bg-elevated:   #131318;
+  --hermes-panel:         #18181f;
+  --hermes-panel-strong:  #1f1f29;
+  --hermes-panel-muted:   #111116;
+  --hermes-border:        rgba(255, 255, 255, 0.07);
+  --hermes-border-strong: rgba(255, 255, 255, 0.14);
+  --hermes-text:          #f0f0f4;
+  --hermes-muted:         #7c7c8a;
+
+  --hermes-accent:        #f59e0b;
+  --hermes-accent-strong: #fbbf24;
+  --hermes-accent-soft:   rgba(245, 158, 11, 0.10);
+
+  --hermes-data:          #60a5fa;
+  --hermes-data-soft:     rgba(96, 165, 250, 0.10);
+
+  --hermes-success:       #34d399;
+  --hermes-warning:       #fb923c;
+  --hermes-danger:        #f87171;
+  --hermes-agent:         #a78bfa;
+  --hermes-agent-soft:    rgba(167, 139, 250, 0.10);
+  --hermes-indigo:        #818cf8;
+  --hermes-indigo-soft:   rgba(129, 140, 248, 0.10);
+}
+
+::selection {
+  background: color-mix(in srgb, var(--hermes-accent-strong) 32%, transparent);
+  color: #f7fbff;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background:
+    radial-gradient(circle at 75% 0%, rgba(245, 158, 11, 0.04), transparent 40%),
+    linear-gradient(180deg, #0c0c10 0%, #0e0e14 100%);
+  color: var(--hermes-text);
+  font-family: "IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.leaflet-container {
+  background: #06131b;
+  font: inherit;
+}
+
+.leaflet-control-attribution {
+  background: rgba(6, 19, 27, 0.82) !important;
+  color: var(--hermes-muted) !important;
+}
+
+.leaflet-control-attribution a {
+  color: #b7d6ef !important;
+}
+
+.hermes-truck-marker {
+  background: transparent;
+  border: 0;
+}
+
+.hermes-truck-marker__inner {
+  display: grid;
+  place-items: center;
+  filter: drop-shadow(0 8px 18px rgba(10, 23, 33, 0.45));
+}
+
+h1,
+[data-brand-text="true"] {
+  font-family: "Instrument Sans", ui-sans-serif, system-ui, sans-serif;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+.hermes-panel {
+  background: linear-gradient(180deg, rgba(19, 35, 48, 0.92), rgba(10, 18, 26, 0.96));
+  border: 1px solid var(--hermes-border);
+}
+
+.hermes-input {
+  width: 100%;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--hermes-panel);
+  color: var(--hermes-text);
+  padding: 0.7rem 0.875rem;
+  outline: none;
+  transition: border-color 120ms ease, box-shadow 120ms ease, background-color 120ms ease;
+}
+
+.hermes-input:focus {
+  border-color: rgba(245, 158, 11, 0.45);
+  box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.10);
+}
+
+/**
+ * Review input — used on the intake review page.
+ * Filled fields look like data (transparent bg/border).
+ * Missing fields get an amber highlight; blocked fields get a rose highlight.
+ */
+.hermes-review-input {
+  width: 100%;
+  border-radius: 0.5rem;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--hermes-text);
+  padding: 0.7rem 0.875rem;
+  outline: none;
+  transition: border-color 120ms ease, box-shadow 120ms ease, background-color 120ms ease;
+}
+
+.hermes-review-input:focus {
+  border-color: rgba(245, 158, 11, 0.45);
+  box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.10);
+  background: var(--hermes-panel);
+}
+
+.hermes-review-input.is-missing {
+  border-color: rgba(245, 158, 11, 0.35);
+  background: rgba(245, 158, 11, 0.05);
+}
+
+.hermes-review-input.is-missing:focus {
+  border-color: rgba(245, 158, 11, 0.55);
+  box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.12);
+  background: rgba(245, 158, 11, 0.08);
+}
+
+.hermes-review-input.is-blocked {
+  border-color: rgba(248, 113, 113, 0.35);
+  background: rgba(248, 113, 113, 0.05);
+}
+
+.hermes-review-input.is-blocked:focus {
+  border-color: rgba(248, 113, 113, 0.55);
+  box-shadow: 0 0 0 4px rgba(248, 113, 113, 0.12);
+  background: rgba(248, 113, 113, 0.08);
+}
+
+.hermes-review-input:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.hermes-primary-button {
+  border-radius: 0.5rem;
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%);
+  color: #0c0c10;
+  font-weight: 700;
+  transition: transform 150ms ease, box-shadow 150ms ease, opacity 150ms ease;
+}
+
+.hermes-primary-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px rgba(245, 158, 11, 0.22);
+}
+
+.hermes-secondary-button {
+  border-radius: 0.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  color: #e2e8f0;
+  transition-property: color, background-color, border-color;
+  transition-duration: 150ms;
+  transition-timing-function: ease;
+}
+
+.hermes-secondary-button:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.20);
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes shimmer {
+  from {
+    background-position: -200% center;
+  }
+  to {
+    background-position: 200% center;
+  }
+}

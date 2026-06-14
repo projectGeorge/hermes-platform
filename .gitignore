@@ -1,0 +1,29 @@
+# Python / Backend
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+env/
+.pytest_cache/
+*.db
+
+# Node / Frontend
+node_modules/
+dist/
+build/
+.npm/
+
+# Variables de entorno y secretos
+.env
+*.env
+
+# ChromaDB runtime data
+chroma_data/
+
+# Entornos de desarrollo / SO
+.vscode/
+.idea/
+.DS_Store
+*.log
+.worktrees/
