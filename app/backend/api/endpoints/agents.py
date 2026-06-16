@@ -2,7 +2,7 @@
 
 from fastapi import APIRouter, Depends, Query
 
-from app.backend.api.dependencies.auth import get_current_user
+from app.backend.api.dependencies.auth import CurrentUserDep, get_current_user
 from app.backend.db.session import AsyncSessionDep
 from app.backend.schemas.agents import AgentStatusListResponse, OrchestratorTimelineItem
 from app.backend.services.agent_activity_log import get_agent_statuses, get_orchestrator_timeline
@@ -17,15 +17,17 @@ router = APIRouter(
 @router.get("/status", response_model=AgentStatusListResponse)
 async def get_agent_statuses_endpoint(
     session: AsyncSessionDep,
+    current_user: CurrentUserDep,
 ) -> AgentStatusListResponse:
     """Return one dashboard card payload per agent kind."""
-    statuses = await get_agent_statuses(session)
+    statuses = await get_agent_statuses(session, user_id=current_user.id)
     return AgentStatusListResponse(agents=statuses)
 
 
 @router.get("/orchestrator/timeline", response_model=list[OrchestratorTimelineItem])
 async def get_orchestrator_timeline_endpoint(
     session: AsyncSessionDep,
+    current_user: CurrentUserDep,
     limit: int = Query(default=20, ge=1, le=100),
     load_order_id: str | None = Query(default=None),
 ) -> list[OrchestratorTimelineItem]:
@@ -33,4 +35,4 @@ async def get_orchestrator_timeline_endpoint(
     from uuid import UUID
 
     parsed_order_id = UUID(load_order_id) if load_order_id else None
-    return await get_orchestrator_timeline(session, limit=limit, load_order_id=parsed_order_id)
+    return await get_orchestrator_timeline(session, limit=limit, load_order_id=parsed_order_id, user_id=current_user.id)

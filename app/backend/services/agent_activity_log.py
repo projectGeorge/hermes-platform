@@ -56,7 +56,7 @@ async def append_agent_activity(
     return activity
 
 
-async def get_agent_statuses(session: AsyncSession) -> list[AgentStatusResponse]:
+async def get_agent_statuses(session: AsyncSession, user_id: UUID | None = None) -> list[AgentStatusResponse]:
     """Derive dashboard agent status cards from latest activities."""
     statuses: list[AgentStatusResponse] = []
 
@@ -64,9 +64,14 @@ async def get_agent_statuses(session: AsyncSession) -> list[AgentStatusResponse]
         stmt = (
             select(AgentActivity)
             .where(AgentActivity.agent_kind == agent_kind)
-            .order_by(AgentActivity.created_at.desc())
-            .limit(1)
         )
+        
+        if user_id is not None:
+            stmt = stmt.join(LoadOrder, AgentActivity.load_order_id == LoadOrder.id, isouter=True).where(
+                (AgentActivity.load_order_id.is_(None)) | (LoadOrder.user_id == user_id)
+            )
+        
+        stmt = stmt.order_by(AgentActivity.created_at.desc()).limit(1)
         result = await session.execute(stmt)
         latest = result.scalar_one_or_none()
 
@@ -93,6 +98,12 @@ async def get_agent_statuses(session: AsyncSession) -> list[AgentStatusResponse]
                     ]),
                 )
             )
+            
+            if user_id is not None:
+                count_stmt = count_stmt.join(LoadOrder, AgentActivity.load_order_id == LoadOrder.id, isouter=True).where(
+                    (AgentActivity.load_order_id.is_(None)) | (LoadOrder.user_id == user_id)
+                )
+            
             count_result = await session.execute(count_stmt)
             active_count = count_result.scalar() or 0
 
@@ -115,6 +126,7 @@ async def get_orchestrator_timeline(
     *,
     limit: int = 20,
     load_order_id: UUID | None = None,
+    user_id: UUID | None = None,
 ) -> list[OrchestratorTimelineItem]:
     """Return recent orchestrator timeline items with linked order metadata."""
     stmt = (
@@ -126,6 +138,11 @@ async def get_orchestrator_timeline(
 
     if load_order_id is not None:
         stmt = stmt.where(AgentActivity.load_order_id == load_order_id)
+    
+    if user_id is not None:
+        stmt = stmt.where(
+            (AgentActivity.load_order_id.is_(None)) | (LoadOrder.user_id == user_id)
+        )
 
     result = await session.execute(stmt)
     rows = result.all()
