@@ -132,17 +132,18 @@ async def get_orchestrator_timeline(
     stmt = (
         select(AgentActivity, LoadOrder)
         .outerjoin(LoadOrder, AgentActivity.load_order_id == LoadOrder.id)
-        .order_by(AgentActivity.created_at.desc())
-        .limit(limit)
     )
 
     if load_order_id is not None:
         stmt = stmt.where(AgentActivity.load_order_id == load_order_id)
-    
-    if user_id is not None:
+    elif user_id is not None:
+        # Filter: only show activities for this user's orders OR activities without order
         stmt = stmt.where(
-            (AgentActivity.load_order_id.is_(None)) | (LoadOrder.user_id == user_id)
+            (AgentActivity.load_order_id.is_(None)) | 
+            (LoadOrder.user_id == user_id)
         )
+    
+    stmt = stmt.order_by(AgentActivity.created_at.desc()).limit(limit)
 
     result = await session.execute(stmt)
     rows = result.all()
