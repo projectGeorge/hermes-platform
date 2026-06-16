@@ -27,6 +27,15 @@ async def get_or_provision_current_user(
     if user is not None:
         return user
 
+    # Fallback: search by email in case auth_id changed (e.g., account recreated in Clerk)
+    result = await session.execute(select(User).where(User.email == str(profile.email)))
+    user = result.scalar_one_or_none()
+    if user is not None:
+        # Update auth_id to the new one from Clerk
+        user.auth_id = profile.auth_id
+        await session.flush()
+        return user
+
     user = User(
         email=str(profile.email),
         operator_name=profile.operator_name,
