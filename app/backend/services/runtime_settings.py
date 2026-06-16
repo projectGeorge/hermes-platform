@@ -39,8 +39,16 @@ def _build_response(stored: dict[str, object] | None) -> RuntimeSettingsResponse
     )
 
 
-async def get_runtime_settings(session: AsyncSession) -> RuntimeSettingsResponse:
-    row = await session.get(AppRuntimeSetting, "runtime_settings")
+async def get_runtime_settings(session: AsyncSession, user_id: UUID) -> RuntimeSettingsResponse:
+    from sqlalchemy import select
+    from app.backend.models.app_runtime_setting import AppRuntimeSetting
+    
+    stmt = select(AppRuntimeSetting).where(
+        (AppRuntimeSetting.key == "runtime_settings"),
+        (AppRuntimeSetting.user_id == user_id)
+    )
+    result = await session.execute(stmt)
+    row = result.scalar_one_or_none()
     stored = row.value_json if row else None
     return _build_response(stored)
 
@@ -48,19 +56,33 @@ async def get_runtime_settings(session: AsyncSession) -> RuntimeSettingsResponse
 async def upsert_runtime_settings(
     session: AsyncSession,
     payload: RuntimeSettingsUpdate,
+    user_id: UUID,
 ) -> RuntimeSettingsResponse:
+    from sqlalchemy import select
+    from app.backend.models.app_runtime_setting import AppRuntimeSetting
+    
     updates = payload.model_dump(exclude_unset=True)
     if not updates:
-        return await get_runtime_settings(session)
+        return await get_runtime_settings(session, user_id)
 
-    row = await session.get(AppRuntimeSetting, "runtime_settings")
+    stmt = select(AppRuntimeSetting).where(
+        (AppRuntimeSetting.key == "runtime_settings"),
+        (AppRuntimeSetting.user_id == user_id)
+    )
+    result = await session.execute(stmt)
+    row = result.scalar_one_or_none()
+    
     if row is None:
-        row = AppRuntimeSetting(key="runtime_settings", value_json=dict(_RUNTIME_DEFAULTS))
+        row = AppRuntimeSetting(
+            key="runtime_settings", 
+            user_id=user_id,
+            value_json=dict(_RUNTIME_DEFAULTS)
+        )
         session.add(row)
 
     row.value_json = {**row.value_json, **updates}
     await session.flush()
-    return await get_runtime_settings(session)
+    return await get_runtime_settings(session, user_id)
 
 
 _BOOLEAN_SETTINGS_CACHE: dict[str, bool] | None = None

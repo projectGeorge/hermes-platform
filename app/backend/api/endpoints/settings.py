@@ -19,16 +19,18 @@ router = APIRouter(
 @router.get("/runtime", response_model=RuntimeSettingsResponse)
 async def get_runtime_settings_endpoint(
     session: AsyncSessionDep,
+    current_user: CurrentUserDep,
 ) -> RuntimeSettingsResponse:
-    return await get_runtime_settings(session)
+    return await get_runtime_settings(session, user_id=current_user.id)
 
 
 @router.put("/runtime", response_model=RuntimeSettingsResponse)
 async def update_runtime_settings_endpoint(
     payload: RuntimeSettingsUpdate,
     session: AsyncSessionDep,
+    current_user: CurrentUserDep,
 ) -> RuntimeSettingsResponse:
-    result = await upsert_runtime_settings(session, payload)
+    result = await upsert_runtime_settings(session, payload, user_id=current_user.id)
     invalidate_boolean_settings_cache()
     await session.commit()
     return result
