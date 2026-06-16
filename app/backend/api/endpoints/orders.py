@@ -121,8 +121,8 @@ async def create_order(
 @router.get("/", response_model=list[LoadOrderResponse])
 async def list_orders(
     session: AsyncSessionDep,
+    current_user: CurrentUserDep,
     status: LoadOrderStatus | None = None,
-    user_id: UUID | None = None,
     customer_id: UUID | None = None,
     skip: int = Query(default=0, ge=0),
     limit: int = Query(default=100, ge=1, le=500),
@@ -130,7 +130,7 @@ async def list_orders(
     return await list_load_orders(
         session,
         status=status,
-        user_id=user_id,
+        user_id=current_user.id,
         customer_id=customer_id,
         skip=skip,
         limit=limit,
@@ -140,8 +140,8 @@ async def list_orders(
 @router.get("/page", response_model=LoadOrderListPageResponse)
 async def list_orders_page_endpoint(
     session: AsyncSessionDep,
+    current_user: CurrentUserDep,
     status: LoadOrderStatus | None = None,
-    user_id: UUID | None = None,
     customer_id: UUID | None = None,
     active_only: bool = False,
     search: str | None = None,
@@ -151,7 +151,7 @@ async def list_orders_page_endpoint(
     return await list_load_orders_page(
         session,
         status=status,
-        user_id=user_id,
+        user_id=current_user.id,
         customer_id=customer_id,
         active_only=active_only,
         search=search,
@@ -163,9 +163,10 @@ async def list_orders_page_endpoint(
 @router.get("/summary", response_model=DashboardLoadOrderSummaryResponse)
 async def get_dashboard_load_order_summary_endpoint(
     session: AsyncSessionDep,
+    current_user: CurrentUserDep,
     limit: int = Query(default=5, ge=1, le=10),
 ) -> DashboardLoadOrderSummaryResponse:
-    return await get_dashboard_load_order_summary(session, limit=limit)
+    return await get_dashboard_load_order_summary(session, user_id=current_user.id, limit=limit)
 
 
 @router.get("/geocode/distance")

@@ -380,27 +380,29 @@ async def list_load_orders_page(
 async def get_dashboard_load_order_summary(
     session: AsyncSession,
     *,
+    user_id: UUID | None = None,
     limit: int = 5,
 ) -> DashboardLoadOrderSummaryResponse:
+    base_filter = LoadOrder.user_id == user_id if user_id else True
     active_count_result = await session.execute(
         select(func.count())
         .select_from(LoadOrder)
-        .where(LoadOrder.status != LoadOrderStatus.CANCELLED)
+        .where(LoadOrder.status != LoadOrderStatus.CANCELLED, base_filter)
     )
     needs_attention_result = await session.execute(
         select(func.count())
         .select_from(LoadOrder)
-        .where(LoadOrder.status.in_(_DASHBOARD_ATTENTION_STATUSES))
+        .where(LoadOrder.status.in_(_DASHBOARD_ATTENTION_STATUSES), base_filter)
     )
     attention_orders_result = await session.execute(
         select(LoadOrder)
-        .where(LoadOrder.status.in_(_DASHBOARD_ATTENTION_STATUSES))
+        .where(LoadOrder.status.in_(_DASHBOARD_ATTENTION_STATUSES), base_filter)
         .order_by(LoadOrder.updated_at.desc(), LoadOrder.created_at.desc())
         .limit(limit)
     )
     recent_active_orders_result = await session.execute(
         select(LoadOrder)
-        .where(LoadOrder.status != LoadOrderStatus.CANCELLED)
+        .where(LoadOrder.status != LoadOrderStatus.CANCELLED, base_filter)
         .order_by(LoadOrder.updated_at.desc(), LoadOrder.created_at.desc())
         .limit(limit)
     )
