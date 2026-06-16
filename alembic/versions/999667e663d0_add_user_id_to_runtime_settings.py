@@ -27,6 +27,9 @@ def upgrade() -> None:
                existing_nullable=False,
                existing_server_default=sa.text('CURRENT_TIMESTAMP'))
     
+    # Drop existing primary key constraint
+    op.drop_constraint('app_runtime_settings_pkey', 'app_runtime_settings', type_='primary')
+    
     # Add id column as nullable first
     op.add_column('app_runtime_settings', sa.Column('id', sa.Integer(), nullable=True))
     op.add_column('app_runtime_settings', sa.Column('user_id', sa.Uuid(), nullable=True))
@@ -152,8 +155,10 @@ def downgrade() -> None:
                type_=postgresql.TIMESTAMP(),
                existing_nullable=False,
                existing_server_default=sa.text('CURRENT_TIMESTAMP'))
+    op.drop_constraint('pk_app_runtime_settings', 'app_runtime_settings', type_='primary')
     op.drop_column('app_runtime_settings', 'user_id')
     op.drop_column('app_runtime_settings', 'id')
+    op.create_primary_key('app_runtime_settings_pkey', 'app_runtime_settings', ['key'])
     op.alter_column('agent_activities', 'created_at',
                existing_type=sa.DateTime(timezone=True),
                type_=postgresql.TIMESTAMP(),
